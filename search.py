@@ -70,8 +70,38 @@ class SemanticSearch(object):
         documents = []
         for document_id in documents_prefilter:
             doc = Document.get(self.session, document_id)
-            print(document_id, doc.id) #type: ignore
             if doc:
                 documents.append(doc)
         return documents
                 
+
+    def retrieve(self, *, document_id:int) -> Document | None:
+        return Document.get(self.session, document_id)
+
+    
+    def delete(self, *, document_id:int) -> bool:
+        try:
+            # Get the document
+            doc = Document.get(self.session, document_id)
+            if not doc:
+                print(f"Document with id {document_id} not found.")
+                return False
+
+            # Get and delete associated chunks
+            chunks = DocumentChunk.query_eq(self.session, "document_id", document_id)
+            for chunk in chunks:
+                # Delete from index
+                try:
+                    if chunk.id:
+                        self.index.delete(chunk.id)
+                except Exception as e:
+                    print(f"Error deleting chunk from index: {e}")
+                # Delete from database
+                chunk.delete(self.session)
+
+            # Delete the document
+            doc.delete(self.session)
+            return True
+        except Exception as e:
+            print(f"Error deleting document: {e}")
+            return False

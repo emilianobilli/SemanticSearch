@@ -277,25 +277,17 @@ async def search_documents(
         )
 
 @app.get("/documents/{document_id}", response_model=DocumentResponse)
-async def get_document(document_id: str):  # Cambiar a string
+async def get_document(document_id: str):
     """Get a specific document by ID"""
     if semantic_search is None:
         raise HTTPException(status_code=503, detail="Service not initialized")
-    
     try:
-        # Convertir string de vuelta a int para la consulta
-        try:
-            doc_id = int(document_id)
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid document ID format")
-            
-        document = Document.get(semantic_search.session, doc_id)
-        
+        doc_id = int(document_id)
+        document = semantic_search.retrieve(document_id=doc_id)
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
-        
         return DocumentResponse(
-            id=str(document.id) if document.id else None,  # Convertir a string
+            id=str(document.id) if document.id else None,
             title=document.title,
             author=document.author,
             source=document.source,
@@ -303,13 +295,31 @@ async def get_document(document_id: str):  # Cambiar a string
             raw_text=document.raw_text,
             metadata=document.metadata
         )
-        
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"Error retrieving document: {str(e)}"
+        )
+
+@app.delete("/documents/{document_id}")
+async def delete_document(document_id: str):
+    """Delete a document and its associated chunks by ID"""
+    if semantic_search is None:
+        raise HTTPException(status_code=503, detail="Service not initialized")
+    try:
+        doc_id = int(document_id)
+        success = semantic_search.delete(document_id=doc_id)
+        if not success:
+            raise HTTPException(status_code=404, detail="Document not found or could not be deleted")
+        return {"success": True, "message": f"Document {document_id} deleted successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error deleting document: {str(e)}"
         )
 
 if __name__ == "__main__":
