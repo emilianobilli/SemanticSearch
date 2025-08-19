@@ -51,7 +51,7 @@ The system uses state-of-the-art sentence transformers for embedding generation 
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/emilianobilli/SemanticSearch
 cd SemanticSearch
 ```
 
