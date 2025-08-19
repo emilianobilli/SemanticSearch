@@ -371,10 +371,6 @@ SEMANTIC_API_LOG_LEVEL=debug python api.py
 5. Ensure all tests pass
 6. Submit a pull request
 
-## License
-
-[Add your license information here]
-
 ## Support
 
 For issues and questions:
