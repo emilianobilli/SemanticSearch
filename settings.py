@@ -22,15 +22,25 @@ except ImportError:
 class Settings(BaseModel):
     """Configuración de la aplicación"""
     
-    # Configuración de Victor Database
-    victor_table_socket: str = Field(
-        default="/tmp/victor_default_table.sock",
-        description="Path al socket Unix de VictorDB Table"
+    # Configuración de Victor Database Server (solo las necesarias)
+    victor_name: str = Field(
+        default="semantic_search",
+        description="Nombre del servidor VictorDB"
     )
     
-    victor_index_socket: str = Field(
-        default="/tmp/victor_default_index.sock", 
-        description="Path al socket Unix de VictorDB Index"
+    victor_index_dims: int = Field(
+        default=384,
+        description="Dimensiones del índice vectorial"
+    )
+    
+    victor_index_type: str = Field(
+        default="HNSW",
+        description="Tipo de índice vectorial"
+    )
+    
+    victor_index_method: str = Field(
+        default="cosine",
+        description="Método de cálculo de distancia"
     )
     
     # Configuración de la API
@@ -59,8 +69,13 @@ class Settings(BaseModel):
 def load_settings_from_env() -> Settings:
     """Carga la configuración desde variables de entorno"""
     return Settings(
-        victor_table_socket=os.getenv("SEMANTIC_VICTOR_TABLE_SOCKET", "/tmp/victor_default_table.sock"),
-        victor_index_socket=os.getenv("SEMANTIC_VICTOR_INDEX_SOCKET", "/tmp/victor_default_index.sock"),
+        # Configuración de VictorDB Server (solo las que se usan)
+        victor_name=os.getenv("VICTOR_NAME", "semantic_search"),
+        victor_index_dims=int(os.getenv("VICTOR_INDEX_DIMS", "384")),
+        victor_index_type=os.getenv("VICTOR_INDEX_TYPE", "HNSW"),
+        victor_index_method=os.getenv("VICTOR_INDEX_METHOD", "cosine"),
+        
+        # Configuración de API
         api_host=os.getenv("SEMANTIC_API_HOST", "0.0.0.0"),
         api_port=int(os.getenv("SEMANTIC_API_PORT", "8000")),
         api_reload=os.getenv("SEMANTIC_API_RELOAD", "true").lower() == "true",

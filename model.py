@@ -11,7 +11,6 @@ class Document(VictorBaseModel):
     title:  str = ""
     author: str = ""
     source: str = ""
-    published_at: str = ""
     raw_text: str = ""
     metadata: List[str] = field(default_factory=list)
 
